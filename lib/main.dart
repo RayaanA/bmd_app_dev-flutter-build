@@ -51,7 +51,7 @@ class MyAppState extends ChangeNotifier {
   final flutterReactiveBle = FlutterReactiveBle();
   late StreamSubscription<DiscoveredDevice> scanStream;
   late StreamSubscription<ConnectionStateUpdate> connectionStream;
-
+  late QualifiedCharacteristic rxCharacteristic;
   //ScannerPage variables
   int progression = 0;
   bool saveNew = false;
@@ -106,30 +106,34 @@ class MyAppState extends ChangeNotifier {
 
   void connectToDevice() {
     //delete these variables later
+    scanStream.cancel();
     final Uuid serviceUuid = Uuid.parse(serviceUUID);
     final Uuid characteristicUuid = Uuid.parse(characteristicUUID);
     // final Uuid characteristicUuid = Uuid.parse("beb5483e-36e1-4688-b7f5-ea07361b26a8");
-    connectionStream = flutterReactiveBle
-        .connectToDevice(
-      id: selectedDevice[0].id,
-      connectionTimeout: const Duration(seconds: 2),
-    )
-        .listen((connectionState) {
-      //would handle listening here
-      final characteristic = QualifiedCharacteristic(
-          serviceId: serviceUuid,
-          characteristicId: characteristicUuid,
-          deviceId: selectedDevice[0].id);
-      flutterReactiveBle.subscribeToCharacteristic(characteristic).listen(
-          (data) {
-        // code to handle incoming data
-        charData = data;
-        connectedToDevice = true;
-      }, onError: (dynamic error) {
-        // code to handle errors
-      });
-    }, onError: (Object error) {
-      print(error);
+    Stream<ConnectionStateUpdate> connectionStream = flutterReactiveBle
+        .connectToAdvertisingDevice(
+        id: selectedDevice[0].id,
+        prescanDuration: const Duration(seconds: 2),
+        withServices: [serviceUuid, characteristicUuid]);
+    connectionStream.listen((event) {
+      switch (event.connectionState) {
+      // We're connected and good to go!
+        case DeviceConnectionState.connected:
+          {
+            rxCharacteristic = QualifiedCharacteristic(
+                serviceId: serviceUuid,
+                characteristicId: characteristicUuid,
+                deviceId: event.deviceId);
+            connectedToDevice = true;
+            break;
+          }
+      // Can add various state state updates on disconnect
+        case DeviceConnectionState.disconnected:
+          {
+            break;
+          }
+        default:
+      }
     });
   }
 }
