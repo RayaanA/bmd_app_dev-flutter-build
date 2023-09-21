@@ -446,7 +446,8 @@ class _ScannerPageState extends State<ScannerPage> {
                   appState.serviceUUID = value;
                   return null;
                 },
-                initialValue: "4fafc201-1fb5-459e-8fcc-c5c9c331914b",
+                //initialValue: "4fafc201-1fb5-459e-8fcc-c5c9c331914b",
+                initialValue: "5e662170-8abd-4a9c-9c00-1587fce1633b",
               ),
               TextFormField(
                 decoration: const InputDecoration(
@@ -461,7 +462,8 @@ class _ScannerPageState extends State<ScannerPage> {
                   appState.characteristicUUID = value;
                   return null;
                 },
-                initialValue: "beb5483e-36e1-4688-b7f5-ea07361b26a8",
+                //initialValue: "beb5483e-36e1-4688-b7f5-ea07361b26a8",
+                initialValue: "5e662171-8abd-4a9c-9c00-1587fce1633b",
               ),
               Container(
                   padding: const EdgeInsets.only(left: 150.0, top: 40.0),
