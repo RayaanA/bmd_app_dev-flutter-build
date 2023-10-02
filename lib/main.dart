@@ -24,6 +24,17 @@ class AppState extends ChangeNotifier {
   final flutterReactiveBle = FlutterReactiveBle();
   List<DiscoveredDevice> devices = [];
   List<List<int>> allData = [];
+  List<String> _receivedData= [];
+  int _numberOfMessagesReceived = 0;
+  void onNewReceivedData(List<int> data) {
+    _numberOfMessagesReceived += 1;
+    _receivedData.add( "$_numberOfMessagesReceived: ${String.fromCharCodes(data)}");
+    if (_receivedData.length > 5) {
+      _receivedData.removeAt(0);
+    }
+    //refreshScreen();
+  }
+
   Future<void> startScan() async {
     devices.clear();
     final location = await Permission.location.request();
@@ -42,28 +53,32 @@ class AppState extends ChangeNotifier {
         }
       });
     }
+    
   }
 
     Future<void> connectToDevice(DiscoveredDevice selectedDevice) async {
       try {
-        flutterReactiveBle.connectToDevice(id: selectedDevice.id);
-        Uuid serviceUUID = Uuid.parse("5e662170-8abd-4a9c-9c00-1587fce1633b");
-        Uuid characteristicUUID = Uuid.parse("5e662171-8abd-4a9c-9c00-1587fce1633b");
-        //Uuid serviceUUID = Uuid.parse("d9deb300-a6f5-4452-a3a3-58eaa32eaba1");
-        //Uuid characteristicUUID = Uuid.parse("d9deb301-a6f5-4452-a3a3-58eaa32eaba1");
+        flutterReactiveBle.connectToDevice(id: selectedDevice.id,connectionTimeout: const Duration(seconds: 2));
+        //Uuid serviceUUID = Uuid.parse("5e662170-8abd-4a9c-9c00-1587fce1633b");
+        //Uuid characteristicUUID = Uuid.parse("5e662171-8abd-4a9c-9c00-1587fce1633b");
+        Uuid serviceUUID = Uuid.parse("dc405470-a351-4a59-97d8-2e2e3b207fbb");
+        Uuid characteristicUUID = Uuid.parse("2a6b6575-faf6-418c-923f-ccd63a56d955");
         print("THE DEVICE IS CONNECTED");
         final characteristic = QualifiedCharacteristic(serviceId: serviceUUID, characteristicId: characteristicUUID, deviceId: selectedDevice.id);
         print("THE DEVICE IS QUALIFIED");
+        //final response = await flutterReactiveBle.readCharacteristic(characteristic);
+
         flutterReactiveBle.subscribeToCharacteristic(characteristic).listen((data) {
           // code to handle incoming data
-          allData.add(data);
+          onNewReceivedData(data);
         }, onError: (dynamic error) {
           print("NO DATA");
         });
         print("THE DEVICE IS SUBSCRIBED");
-        print("Received Data ${new StringfromCharCodes(allData)}");
-        for (int x=0; x < allData.length; x++){
-          print("Received Data: ${allData[x]}");
+        print("Received Data ");
+        print(_receivedData);
+        for (int x=0; x < _receivedData.length; x++){
+          print("Received Data: ${_receivedData[x]}");
         }
         // Connection successful, you can now communicate with the device
       } catch (e) {
@@ -100,6 +115,7 @@ class MyHomePage extends StatelessWidget {
                   subtitle: Text(device.id),
                   onTap: () async {
                     await appState.connectToDevice(device);
+
                     // Navigate to the DataPage
                     // Implement this navigation as needed
                   },
