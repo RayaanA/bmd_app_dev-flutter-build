@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 class AppState extends ChangeNotifier {
   final flutterReactiveBle = FlutterReactiveBle();
   List<DiscoveredDevice> devices = [];
-
+  List<List<int>> allData = [];
   Future<void> startScan() async {
     devices.clear();
     final location = await Permission.location.request();
@@ -56,14 +56,15 @@ class AppState extends ChangeNotifier {
         print("THE DEVICE IS QUALIFIED");
         flutterReactiveBle.subscribeToCharacteristic(characteristic).listen((data) {
           // code to handle incoming data
-          print("THE DEVICE IS SUBSCRIBED");
-          for (int x=0; x < data.length; x++){
-            print("Received Data: ${data[x]}");
-          }
-
+          allData.add(data);
         }, onError: (dynamic error) {
           print("NO DATA");
         });
+        print("THE DEVICE IS SUBSCRIBED");
+        print("Received Data ${new StringfromCharCodes(allData)}");
+        for (int x=0; x < allData.length; x++){
+          print("Received Data: ${allData[x]}");
+        }
         // Connection successful, you can now communicate with the device
       } catch (e) {
         // Handle connection errors
