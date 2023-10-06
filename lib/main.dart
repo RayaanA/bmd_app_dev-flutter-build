@@ -36,6 +36,8 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> startScan() async {
+    //Uuid serviceUUID = Uuid.parse("5e662170-0000-1000-8000-00805f9b34fb");
+    Uuid serviceUUID = Uuid.parse("5e662170-8abd-4a9c-9c00-1587fce1633b");
     devices.clear();
     final location = await Permission.location.request();
     final advertise = await Permission.bluetoothAdvertise.request();
@@ -43,7 +45,7 @@ class AppState extends ChangeNotifier {
     final connect = await Permission.bluetoothConnect.request();
     if (location.isGranted && advertise.isGranted && scan.isGranted && connect.isGranted) {
       flutterReactiveBle.scanForDevices(
-        withServices: [],
+        withServices: [serviceUUID],
         scanMode: ScanMode.lowPower,
       ).listen((device) {
 // Check if the device is not already in the list before adding it
@@ -60,9 +62,11 @@ class AppState extends ChangeNotifier {
       try {
         flutterReactiveBle.connectToDevice(id: selectedDevice.id,connectionTimeout: const Duration(seconds: 2));
         //Uuid serviceUUID = Uuid.parse("5e662170-8abd-4a9c-9c00-1587fce1633b");
-        //Uuid characteristicUUID = Uuid.parse("5e662171-8abd-4a9c-9c00-1587fce1633b");
-        Uuid serviceUUID = Uuid.parse("dc405470-a351-4a59-97d8-2e2e3b207fbb");
-        Uuid characteristicUUID = Uuid.parse("2a6b6575-faf6-418c-923f-ccd63a56d955");
+        Uuid serviceUUID = Uuid.parse("5e662170-0000-1000-8000-00805f9b34fb");
+
+        Uuid characteristicUUID = Uuid.parse("5e662171-8abd-4a9c-9c00-1587fce1633b");
+        //Uuid serviceUUID = Uuid.parse("dc405470-a351-4a59-97d8-2e2e3b207fbb");
+        //Uuid characteristicUUID = Uuid.parse("2a6b6575-faf6-418c-923f-ccd63a56d955");
         print("THE DEVICE IS CONNECTED");
         final characteristic = QualifiedCharacteristic(serviceId: serviceUUID, characteristicId: characteristicUUID, deviceId: selectedDevice.id);
         print("THE DEVICE IS QUALIFIED");
